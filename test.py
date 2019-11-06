@@ -37,6 +37,12 @@ from util import html
 if __name__ == '__main__':
     opt = TestOptions().parse()  # get test options
     # hard-code some parameters for test
+
+    opt.dataroot = '../datasets/blur_11'
+    opt.model = 'pix2pix'
+    opt.no_flip = True
+    opt.lambda_L1 = 100.0
+
     opt.num_threads = 0   # test code only supports num_threads = 1
     opt.batch_size = 1    # test code only supports batch_size = 1
     opt.serial_batches = True  # disable data shuffling; comment this line if results on randomly chosen images are needed.

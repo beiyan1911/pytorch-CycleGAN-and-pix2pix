@@ -26,6 +26,15 @@ from util.visualizer import Visualizer
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
+
+    opt.dataroot = '../datasets/blur_11'
+    opt.model = 'pix2pix'
+    opt.no_flip = True
+    opt.lambda_L1 = 100.0
+    # opt.dataset_mode = "aligned"
+    opt.serial_batches = True
+    opt.preprocess = ''
+
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size)

@@ -152,11 +152,11 @@ class BaseModel(ABC):
                 save_path = os.path.join(self.save_dir, save_filename)
                 net = getattr(self, 'net' + name)
 
-                if len(self.gpu_ids) > 0 and torch.cuda.is_available():
-                    torch.save(net.module.cpu().state_dict(), save_path)
+                if len(self.gpu_ids) > 1 and torch.cuda.is_available():
+                    torch.save(net.module.module.state_dict(), save_path)
                     net.cuda(self.gpu_ids[0])
                 else:
-                    torch.save(net.cpu().state_dict(), save_path)
+                    torch.save(net.state_dict(), save_path)
 
     def __patch_instance_norm_state_dict(self, state_dict, module, keys, i=0):
         """Fix InstanceNorm checkpoints incompatibility (prior to 0.4)"""
@@ -193,31 +193,31 @@ class BaseModel(ABC):
                     del state_dict._metadata
 
                 # patch InstanceNorm checkpoints prior to 0.4
-                for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
-                    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
+                # for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
+                #     self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
 
-                missings = ["model.10.conv_block.6.weight", "model.10.conv_block.6.bias",
-                            "model.11.conv_block.6.weight", "model.11.conv_block.6.bias",
-                            "model.12.conv_block.6.weight", "model.12.conv_block.6.bias",
-                            "model.13.conv_block.6.weight", "model.13.conv_block.6.bias",
-                            "model.14.conv_block.6.weight", "model.14.conv_block.6.bias",
-                            "model.15.conv_block.6.weight", "model.15.conv_block.6.bias",
-                            "model.16.conv_block.6.weight", "model.16.conv_block.6.bias",
-                            "model.17.conv_block.6.weight", "model.17.conv_block.6.bias",
-                            "model.18.conv_block.6.weight", "model.18.conv_block.6.bias"]
-
-                unexpecteds = ["model.10.conv_block.5.weight", "model.10.conv_block.5.bias",
-                               "model.11.conv_block.5.weight", "model.11.conv_block.5.bias",
-                               "model.12.conv_block.5.weight", "model.12.conv_block.5.bias",
-                               "model.13.conv_block.5.weight", "model.13.conv_block.5.bias",
-                               "model.14.conv_block.5.weight", "model.14.conv_block.5.bias",
-                               "model.15.conv_block.5.weight", "model.15.conv_block.5.bias",
-                               "model.16.conv_block.5.weight", "model.16.conv_block.5.bias",
-                               "model.17.conv_block.5.weight", "model.17.conv_block.5.bias",
-                               "model.18.conv_block.5.weight", "model.18.conv_block.5.bias"]
-
-                for i in range(len(missings)):
-                    state_dict[missings[i]] = state_dict.pop(unexpecteds[i])
+                # missings = ["model.10.conv_block.6.weight", "model.10.conv_block.6.bias",
+                #             "model.11.conv_block.6.weight", "model.11.conv_block.6.bias",
+                #             "model.12.conv_block.6.weight", "model.12.conv_block.6.bias",
+                #             "model.13.conv_block.6.weight", "model.13.conv_block.6.bias",
+                #             "model.14.conv_block.6.weight", "model.14.conv_block.6.bias",
+                #             "model.15.conv_block.6.weight", "model.15.conv_block.6.bias",
+                #             "model.16.conv_block.6.weight", "model.16.conv_block.6.bias",
+                #             "model.17.conv_block.6.weight", "model.17.conv_block.6.bias",
+                #             "model.18.conv_block.6.weight", "model.18.conv_block.6.bias"]
+                #
+                # unexpecteds = ["model.10.conv_block.5.weight", "model.10.conv_block.5.bias",
+                #                "model.11.conv_block.5.weight", "model.11.conv_block.5.bias",
+                #                "model.12.conv_block.5.weight", "model.12.conv_block.5.bias",
+                #                "model.13.conv_block.5.weight", "model.13.conv_block.5.bias",
+                #                "model.14.conv_block.5.weight", "model.14.conv_block.5.bias",
+                #                "model.15.conv_block.5.weight", "model.15.conv_block.5.bias",
+                #                "model.16.conv_block.5.weight", "model.16.conv_block.5.bias",
+                #                "model.17.conv_block.5.weight", "model.17.conv_block.5.bias",
+                #                "model.18.conv_block.5.weight", "model.18.conv_block.5.bias"]
+                #
+                # for i in range(len(missings)):
+                #     state_dict[missings[i]] = state_dict.pop(unexpecteds[i])
 
                 net.load_state_dict(state_dict)
 
